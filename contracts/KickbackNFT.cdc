@@ -106,7 +106,7 @@ pub contract KickbackNFT: NonFungibleToken {
         pub fun getIDs(): [UInt64]
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT
         pub fun borrowViewResolver(id: UInt64): &KickbackNFT.NFT
-        pub fun buy(collectionCapability: Capability<&Collection{KickbackNFT.KickbackNFTCollectionPublic}>)
+        pub fun buy(collectionCapability: Capability<&Collection{KickbackNFT.KickbackNFTCollectionPublic}>, episodeID: String)
     }
 
     pub resource Collection: NonFungibleToken.Receiver, NonFungibleToken.Provider, NonFungibleToken.CollectionPublic, KickbackNFTCollectionPublic {
@@ -139,7 +139,7 @@ pub contract KickbackNFT: NonFungibleToken {
 			return nft as &KickbackNFT.NFT
 		}
 
-        pub fun buy(collectionCapability: Capability<&Collection{KickbackNFT.KickbackNFTCollectionPublic}>) {
+        pub fun buy(collectionCapability: Capability<&Collection{KickbackNFT.KickbackNFTCollectionPublic}>, episodeID: String) {
             pre {
 				self.owner!.address == KickbackNFT.account.address : "You can only buy the NFT directly from the KickbackNFT account"
 			}
@@ -148,11 +148,16 @@ pub contract KickbackNFT: NonFungibleToken {
                         .borrow<&AnyResource{KickbackNFT.KickbackNFTCollectionPublic}>()
                         ?? panic("Can't get the KickbackNFT collection.")
             let availableNFTs = kickbackCollection.getIDs()
-            // add logic: loop through all availableNFTs and find a specific one
-            let id = availableNFTs[0]
+            var availableID: UInt64
+            for id in availableNFTs {
+                let resolver = kickbackCollection.borrowViewResolver(id: id)
+                if (resolver.episodeID == episodeID) {
+                    availableID = id
+                }
+            }
 
             let receiver = collectionCapability.borrow() ?? panic("Could not borrow KickbackNFT collection")
-            let token <- self.withdraw(withdrawID: id) as! @KickbackNFT.NFT
+            let token <- self.withdraw(withdrawID: availableID) as! @KickbackNFT.NFT
 
 			receiver.deposit(token: <- token)
         }

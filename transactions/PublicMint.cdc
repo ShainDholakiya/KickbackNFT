@@ -2,7 +2,7 @@ import NonFungibleToken from "../contracts/NonFungibleToken.cdc"
 import KickbackNFT from "../contracts/KickbackNFT.cdc"
 import MetadataViews from "../contracts/MetadataViews.cdc"
 
-transaction() {
+transaction(episodeID: String) {
     let signerCapability: Capability<&KickbackNFT.Collection{KickbackNFT.KickbackNFTCollectionPublic}>
     let ownerCollectionRef: &AnyResource{KickbackNFT.KickbackNFTCollectionPublic}
 
@@ -21,7 +21,7 @@ transaction() {
     }
 
     execute {
-        self.ownerCollectionRef.buy(collectionCapability: self.signerCapability);  
+        self.ownerCollectionRef.buy(collectionCapability: self.signerCapability, episodeID: episodeID);  
         log("Minted NFT")
     }
 }
