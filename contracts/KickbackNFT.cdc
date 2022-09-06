@@ -147,7 +147,7 @@ pub contract KickbackNFT: NonFungibleToken {
                         .borrow<&AnyResource{KickbackNFT.KickbackNFTCollectionPublic}>()
                         ?? panic("Can't get the KickbackNFT collection.")
             let availableNFTs = kickbackCollection.getIDs()
-            var availableID: UInt64
+            var availableID: UInt64? = nil
             for id in availableNFTs {
                 let resolver = kickbackCollection.borrowViewResolver(id: id)
                 if (resolver.episodeID == episodeID) {
@@ -155,10 +155,11 @@ pub contract KickbackNFT: NonFungibleToken {
                 }
             }
 
-            let receiver = collectionCapability.borrow() ?? panic("Could not borrow KickbackNFT collection")
-            let token <- self.withdraw(withdrawID: availableID) as! @KickbackNFT.NFT
-
-			receiver.deposit(token: <- token)
+            if (availableID != nil) {
+                let receiver = collectionCapability.borrow() ?? panic("Could not borrow KickbackNFT collection")
+                let token <- self.withdraw(withdrawID: availableID!) as! @KickbackNFT.NFT
+		receiver.deposit(token: <- token)
+            }
         }
 
         destroy() {
