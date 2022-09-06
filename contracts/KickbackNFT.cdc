@@ -24,7 +24,6 @@ pub contract KickbackNFT: NonFungibleToken {
         pub let metadata: {String: String}
 
         init(
-            id: UInt64,
             name: String,
             description: String,
             thumbnail: String,
